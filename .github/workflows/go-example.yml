@@ -1,26 +1,51 @@
 name: artifact
-on: 
+on:
   push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+  workflow_dispatch:
+
+env:
+  FILE_NAME: webserver
+  
 jobs:
   build-go:
-    name: Build Go
+    name: Build GO
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout Go Code
-        uses: actions/checkout@v2
-      - run: echo Hello World
-      - name: Running Linux version
-        run: |
-          echo Running on Linux
-          uname -a
-      - name: Upload artifact for linux
-        uses: actions/upload-artifact@v1.0.0
+    - name: Checkout GO Code
+      uses: actions/checkout@v4
+    - name: Build ${{ env.FILE_NAME }} for ubuntu-latest
+      run: go build ${{ env.FILE_NAME }}.go
+    - name: Build ${{ env.FILE_NAME }} for windows-latest
+      run: GOOS=windows GOARCH=amd64 go build ${{ env.FILE_NAME }}.go
+    
+  upload-job-linux:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Checando sistema operacional linux
+        run: cat /etc/os-release
+
+      - name: Upload artefato no linux
+        uses: actions/upload-artifact@v4
         with:
           name: linux
           path: ./${{ env.FILE_NAME }}
-          
-      - name: Upload artifact for windows
-        uses: actions/upload-artifact@v1.0.0
+
+  upload-job-windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Checando sistema operacional windows
+        run: Get-CimInstance Win32_OperatingSystem
+
+      - name: Upload artefato no windows
+        uses: actions/upload-artifact@v4
         with:
           name: windows
           path: ./${{ env.FILE_NAME }}.exe
+          if-no-files-found: warn
+          overwrite: true
