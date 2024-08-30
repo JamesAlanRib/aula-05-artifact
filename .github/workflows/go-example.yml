@@ -1,13 +1,26 @@
-name: hello-world
-on: push
+name: artifact
+on: 
+  push:
 jobs:
-  hello-world-job:
+  build-go:
+    name: Build Go
     runs-on: ubuntu-latest
     steps:
-      - name: Running hello
-        uses: actions/checkout@v1
+      - name: Checkout Go Code
+        uses: actions/checkout@v2
       - run: echo Hello World
       - name: Running Linux version
         run: |
           echo Running on Linux
           uname -a
+      - name: Upload artifact for linux
+        uses: actions/upload-artifact@v1.0.0
+        with:
+          name: linux
+          path: ./${{ env.FILE_NAME }}
+          
+      - name: Upload artifact for windows
+        uses: actions/upload-artifact@v1.0.0
+        with:
+          name: windows
+          path: ./${{ env.FILE_NAME }}.exe
