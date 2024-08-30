@@ -8,7 +8,7 @@ on:
   workflow_dispatch:
 
 env:
-  FILE_NAME: webserver
+  FILE_NAME: hello-server
   
 jobs:
   build-go:
