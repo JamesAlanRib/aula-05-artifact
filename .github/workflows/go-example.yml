@@ -7,7 +7,7 @@ on:
 
   workflow_dispatch:
   schedule:
-    - cron: "*/15 * * * 2-6" #trigado a cada 15 min, de segunda à sábado.
+    - cron: '*/15 * * * 2-6' #trigado a cada 15 min, de segunda à sábado.
 
 env:
   FILE_NAME: hello-server
@@ -17,63 +17,45 @@ jobs:
     name: Build GO
     runs-on: ubuntu-latest
     steps:
-    - name: Checkout GO Code
+    - name: Checkout repository
       uses: actions/checkout@v4
     - name: Build ${{ env.FILE_NAME }} for ubuntu-latest
       run: go build ${{ env.FILE_NAME }}.go
     - name: Build ${{ env.FILE_NAME }} for windows-latest
       run: GOOS=windows GOARCH=amd64 go build ${{ env.FILE_NAME }}.go
     
-  upload-job-linux:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - name: Checando sistema operacional linux
-        run: cat /etc/os-release
-
-      - name: Upload artefato no linux
-        uses: actions/upload-artifact@v4
-        with:
-          name: linux
-          path: ./${{ env.FILE_NAME }}
-
   download-and-run-linux:
-    name: Download and run Linux
-    runs-on: ubuntu-latest
-    needs: build-go
-    steps:
-      - name: Checkout Code
-        uses: actions/checkout@v4
-      - name: Download Linux Artifact
-        uses: actions/download-artifact@v4
-        with:
-          name: linux
-      - name: Run Script
-        run: source ./run.sh
+      runs-on: ubuntu-latest
+      needs: build-go
+      steps:
+        - name: Checkout Repository
+          uses: actions/checkout@v4
 
-  upload-job-windows:
-    runs-on: windows-latest
-    steps:
-      - uses: actions/checkout@v4
-      - name: Checando sistema operacional windows
-        run: Get-CimInstance Win32_OperatingSystem
+        - name: Download Linux Artifact
+          uses: actions/download-artifact@v4
+          with:
+            name: linux
 
-      - name: Upload artefato no windows
-        uses: actions/upload-artifact@v4
-        with:
-          name: windows
-          path: ./${{ env.FILE_NAME }}.exe
-          if-no-files-found: warn
-          overwrite: true
-    
+        - name: List files in current directory
+          run: ls -la
+
+        - name: Make run.sh executable
+          run: chmod +x ./run.sh
+
+        - name: Run Script
+          run: ./run.sh
+  
   download-only-windows:
-    name: Download Windows
     runs-on: windows-latest
     needs: build-go
     steps:
-      - name: Checkout Code
+      - name: Checkout Repository
         uses: actions/checkout@v4
+
       - name: Download Windows Artifact
         uses: actions/download-artifact@v4
         with:
           name: windows
+
+      - name: List files in current directory
+        run: dir
