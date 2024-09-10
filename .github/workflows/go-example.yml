@@ -9,13 +9,12 @@ on:
   schedule:
     - cron: '*/15 * * * 2-6' #trigado a cada 15 min, de segunda à sábado.
 
-env:
-  FILE_NAME: hello-server
-  
 jobs:
   build-go:
     name: Build GO
     runs-on: ubuntu-latest
+    env:
+      FILE_NAME: hello-server
     steps:
     - name: Checkout repository
       uses: actions/checkout@v4
